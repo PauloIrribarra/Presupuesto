@@ -4,8 +4,9 @@ import CategoryMovementChart from './components/CategoryMovementChart';
 import Metric from './components/Metric';
 import MovementForm from './components/MovementForm';
 import MovementHistory from './components/MovementHistory';
-import { CLP, categories, monthKey } from './constants';
-import { clearBudget, loadState, loadTheme, saveBudget, saveTheme } from './storage';
+import { CLP, categories } from './constants';
+import { formatCycleRange, getCurrentCycle, isDateInCycle } from './dateUtils';
+import { loadState, loadTheme, saveBudget, saveTheme } from './storage';
 
 const getDefaultDraft = () => ({
 	type: 'expense',
@@ -32,43 +33,50 @@ function App() {
 		saveTheme(nextMode);
 	};
 
+	const cycle = useMemo(() => getCurrentCycle(budget.payday), [budget.payday]);
+	const cycleMovements = useMemo(
+		() => budget.movements.filter((movement) => isDateInCycle(movement.date, cycle)),
+		[budget.movements, cycle],
+	);
+	const cycleLabel = useMemo(() => formatCycleRange(cycle), [cycle]);
+
 	const totals = useMemo(() => {
-		const income = budget.movements
+		const income = cycleMovements
 			.filter((movement) => movement.type === 'income')
 			.reduce((sum, movement) => sum + movement.amount, 0);
-		const expenses = budget.movements
+		const expenses = cycleMovements
 			.filter((movement) => movement.type === 'expense')
 			.reduce((sum, movement) => sum + movement.amount, 0);
 		const currentBalance = income - expenses;
-		const today = new Date();
-		const lastDay = new Date(
-			today.getFullYear(),
-			today.getMonth() + 1,
-			0,
-		).getDate();
-		const remainingDays = Math.max(lastDay - today.getDate() + 1, 1);
 
 		return {
 			income,
 			expenses,
 			currentBalance,
-			dailyAvailable: currentBalance / remainingDays,
-			remainingDays,
+			dailyAvailable: currentBalance / cycle.remainingDays,
+			remainingDays: cycle.remainingDays,
 		};
-	}, [budget]);
+	}, [cycle.remainingDays, cycleMovements]);
 
 	const categoryExpenseData = useMemo(
-		() => getCategoryMovementData(budget, 'expense'),
-		[budget],
+		() => getCategoryMovementData(cycleMovements, 'expense'),
+		[cycleMovements],
 	);
 
 	const categoryIncomeData = useMemo(
-		() => getCategoryMovementData(budget, 'income'),
-		[budget],
+		() => getCategoryMovementData(cycleMovements, 'income'),
+		[cycleMovements],
 	);
 
 	const updateDraft = (changes) => {
 		setDraft((currentDraft) => ({ ...currentDraft, ...changes }));
+	};
+
+	const updatePayday = (value) => {
+		const payday = Math.min(Math.max(Number(value), 1), 31);
+		if (!payday) return;
+
+		persist({ ...budget, payday });
 	};
 
 	const addMovement = (event) => {
@@ -100,12 +108,12 @@ function App() {
 
 	const resetData = () => {
 		const initialState = {
-			month: monthKey,
+			payday: budget.payday,
+			month: budget.month,
 			movements: [],
 		};
 
-		clearBudget();
-		setBudget(initialState);
+		persist(initialState);
 	};
 
 	return (
@@ -116,21 +124,22 @@ function App() {
 		>
 			<div className='mx-auto flex w-full max-w-7xl flex-col gap-5 sm:gap-6'>
 				<AppHeader
-					month={budget.month}
+					payday={budget.payday}
+					cycleLabel={cycleLabel}
 					isDarkMode={isDarkMode}
-					onMonthChange={(month) => persist({ ...budget, month })}
+					onPaydayChange={updatePayday}
 					onResetData={resetData}
 					onToggleTheme={toggleTheme}
 				/>
 
-				<section className='grid gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-4'>
+				<section className='grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4'>
 					<Metric
 						title='Saldo actual'
 						value={CLP.format(totals.currentBalance)}
 						strong
 					/>
 					<Metric
-						title='Gastado este mes'
+						title='Gastado este ciclo'
 						value={CLP.format(totals.expenses)}
 					/>
 					<Metric
@@ -140,7 +149,7 @@ function App() {
 					<Metric
 						title='Disponible diario'
 						value={CLP.format(totals.dailyAvailable)}
-						hint={`${totals.remainingDays} dias restantes`}
+						hint={`${totals.remainingDays} dias restantes del ciclo`}
 					/>
 				</section>
 
@@ -163,18 +172,18 @@ function App() {
 						<CategoryMovementChart
 							data={categoryExpenseData}
 							title='Gastos por categoria'
-							emptyMessage='Aun no hay gastos registrados para este mes.'
+							emptyMessage='Aun no hay gastos registrados para este ciclo.'
 							barClassName='bg-[#b86f6f]'
 						/>
 						<CategoryMovementChart
 							data={categoryIncomeData}
 							title='Ingresos por categoria'
-							emptyMessage='Aun no hay ingresos registrados para este mes.'
+							emptyMessage='Aun no hay ingresos registrados para este ciclo.'
 							barClassName='bg-emerald-600'
 						/>
 
 						<MovementHistory
-							movements={budget.movements}
+							movements={cycleMovements}
 							onDelete={deleteMovement}
 						/>
 					</div>
@@ -184,22 +193,21 @@ function App() {
 	);
 }
 
-function getCategoryMovementData(budget, type) {
+function getCategoryMovementData(movements, type) {
 	const items = categories
 		.map((category) => {
-			const movements = budget.movements
+			const categoryMovements = movements
 				.filter(
 					(movement) =>
 						movement.type === type &&
-						movement.category === category &&
-						movement.date.startsWith(budget.month),
+						movement.category === category,
 				)
 				.sort((a, b) => b.date.localeCompare(a.date));
 
 			return {
 				category,
-				movements,
-				total: movements.reduce((sum, movement) => sum + movement.amount, 0),
+				movements: categoryMovements,
+				total: categoryMovements.reduce((sum, movement) => sum + movement.amount, 0),
 			};
 		})
 		.filter((item) => item.total > 0)

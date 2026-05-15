@@ -15,4 +15,5 @@ export const categories = [
 ];
 
 export const monthKey = new Date().toISOString().slice(0, 7);
+export const DEFAULT_PAYDAY = 25;
 export const SHOW_RESET_BUTTON = true;

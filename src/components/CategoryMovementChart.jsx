@@ -13,7 +13,7 @@ function CategoryMovementChart({ data, title, emptyMessage, barClassName }) {
 						{title}
 					</h2>
 					<p className='text-sm text-slate-500 dark:text-emerald-200'>
-						Total agrupado del mes activo
+						Total agrupado del ciclo activo
 					</p>
 				</div>
 				<p className='text-sm font-semibold text-slate-700 dark:text-emerald-100'>

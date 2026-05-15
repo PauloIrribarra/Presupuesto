@@ -1,15 +1,22 @@
-import { monthKey } from './constants';
+import { DEFAULT_PAYDAY, monthKey } from './constants';
 
 export const loadState = () => {
 	const saved = localStorage.getItem('presupuesto-app');
 	if (!saved) {
 		return {
+			payday: DEFAULT_PAYDAY,
 			month: monthKey,
 			movements: [],
 		};
 	}
 
-	return JSON.parse(saved);
+	const state = JSON.parse(saved);
+
+	return {
+		payday: state.payday ?? DEFAULT_PAYDAY,
+		month: state.month ?? monthKey,
+		movements: state.movements ?? [],
+	};
 };
 
 export const loadTheme = () => localStorage.getItem('presupuesto-theme') === 'dark';
