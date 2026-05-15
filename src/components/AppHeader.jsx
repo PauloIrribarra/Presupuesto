@@ -1,4 +1,5 @@
 import { SHOW_RESET_BUTTON } from '../constants';
+import ResetDataButton from './ResetDataButton';
 import ThemeToggle from './ThemeToggle';
 
 function AppHeader({
@@ -36,17 +37,14 @@ function AppHeader({
 					Ciclo actual: {cycleLabel}
 				</p>
 
-				<ThemeToggle isDarkMode={isDarkMode} onToggle={onToggleTheme} />
-
-				{SHOW_RESET_BUTTON && (
-					<button
-						type='button'
-						onClick={onResetData}
-						className='rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-semibold text-rose-600 transition hover:border-rose-300 hover:bg-rose-100 dark:border-rose-900/70 dark:bg-rose-950/40 dark:text-rose-200 dark:hover:border-rose-700 dark:hover:bg-rose-900/50'
-					>
-						Reiniciar datos de prueba
-					</button>
-				)}
+				<div className='flex items-center gap-3'>
+					<ThemeToggle isDarkMode={isDarkMode} onToggle={onToggleTheme} />
+					{SHOW_RESET_BUTTON && (
+						<div className='ml-auto'>
+							<ResetDataButton onReset={onResetData} />
+						</div>
+					)}
+				</div>
 			</div>
 		</header>
 	);
