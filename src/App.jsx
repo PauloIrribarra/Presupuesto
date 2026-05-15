@@ -20,6 +20,7 @@ function App() {
 	const [budget, setBudget] = useState(loadState);
 	const [isDarkMode, setIsDarkMode] = useState(loadTheme);
 	const [isCategoryOpen, setIsCategoryOpen] = useState(false);
+	const [activeView, setActiveView] = useState('general');
 	const [draft, setDraft] = useState(getDefaultDraft);
 
 	const persist = (nextBudget) => {
@@ -122,74 +123,177 @@ function App() {
 				isDarkMode ? 'dark bg-emerald-950' : 'bg-[#f6f7f2]'
 			}`}
 		>
-			<div className='mx-auto flex w-full max-w-7xl flex-col gap-5 sm:gap-6'>
-				<AppHeader
-					payday={budget.payday}
-					cycleLabel={cycleLabel}
-					isDarkMode={isDarkMode}
-					onPaydayChange={updatePayday}
-					onResetData={resetData}
-					onToggleTheme={toggleTheme}
-				/>
+			<div className='relative mx-auto w-full max-w-7xl'>
+				<DesktopSidebar activeView={activeView} onViewChange={setActiveView} />
 
-				<section className='grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4'>
-					<Metric
-						title='Saldo actual'
-						value={CLP.format(totals.currentBalance)}
-						strong
-					/>
-					<Metric
-						title='Gastado este ciclo'
-						value={CLP.format(totals.expenses)}
-					/>
-					<Metric
-						title='Ingresos extra'
-						value={CLP.format(totals.income)}
-					/>
-					<Metric
-						title='Disponible diario'
-						value={CLP.format(totals.dailyAvailable)}
-						hint={`${totals.remainingDays} dias restantes del ciclo`}
-					/>
-				</section>
-
-				<section className='grid min-w-0 gap-5 lg:grid-cols-[minmax(300px,380px)_minmax(0,1fr)] lg:gap-6'>
-					<div className='min-w-0 space-y-5 sm:space-y-6'>
-						<MovementForm
+				<div className='flex min-w-0 flex-1 flex-col gap-5 sm:gap-6'>
+					{activeView === 'general' ? (
+						<PanelGeneral
+							budget={budget}
+							categoryExpenseData={categoryExpenseData}
+							categoryIncomeData={categoryIncomeData}
+							cycleLabel={cycleLabel}
+							cycleMovements={cycleMovements}
 							draft={draft}
 							isCategoryOpen={isCategoryOpen}
-							onCategoryToggle={() => setIsCategoryOpen((open) => !open)}
+							isDarkMode={isDarkMode}
+							totals={totals}
+							onAddMovement={addMovement}
 							onCategoryChange={(category) => {
 								updateDraft({ category });
 								setIsCategoryOpen(false);
 							}}
+							onCategoryToggle={() => setIsCategoryOpen((open) => !open)}
+							onDeleteMovement={deleteMovement}
 							onDraftChange={updateDraft}
-							onSubmit={addMovement}
+							onPaydayChange={updatePayday}
+							onResetData={resetData}
+							onToggleTheme={toggleTheme}
 						/>
-					</div>
-
-					<div className='min-w-0 space-y-5 sm:space-y-6'>
-						<CategoryMovementChart
-							data={categoryExpenseData}
-							title='Gastos por categoria'
-							emptyMessage='Aun no hay gastos registrados para este ciclo.'
-							barClassName='bg-[#b86f6f]'
-						/>
-						<CategoryMovementChart
-							data={categoryIncomeData}
-							title='Ingresos por categoria'
-							emptyMessage='Aun no hay ingresos registrados para este ciclo.'
-							barClassName='bg-emerald-600'
-						/>
-
-						<MovementHistory
-							movements={cycleMovements}
-							onDelete={deleteMovement}
-						/>
-					</div>
-				</section>
+					) : (
+						<SavingsView />
+					)}
+				</div>
 			</div>
 		</main>
+	);
+}
+
+function DesktopSidebar({ activeView, onViewChange }) {
+	const items = [
+		{ id: 'general', label: 'Panel General' },
+		{ id: 'savings', label: 'Ahorros' },
+	];
+
+	return (
+		<aside className='absolute right-full top-0 hidden w-48 pr-10 lg:block'>
+			<nav className='flex flex-col items-center gap-7 pt-14'>
+				{items.map((item) => {
+					const isActive = activeView === item.id;
+
+					return (
+						<button
+							key={item.id}
+							type='button'
+							onClick={() => onViewChange(item.id)}
+							className={`group w-fit whitespace-nowrap text-center text-sm font-semibold transition ${
+								isActive
+									? 'text-emerald-950 drop-shadow-[0_0_8px_rgba(16,185,129,0.75)] dark:text-emerald-100'
+									: 'text-emerald-700 drop-shadow-[0_0_5px_rgba(16,185,129,0.45)] hover:text-emerald-950 hover:drop-shadow-[0_0_10px_rgba(52,211,153,0.85)] dark:text-emerald-300 dark:hover:text-emerald-50'
+							}`}
+						>
+							<span className='relative inline-block rounded-sm px-1 py-1 [text-shadow:0_0_10px_rgba(52,211,153,0.55)] after:absolute after:bottom-0 after:left-0 after:h-px after:w-full after:origin-left after:scale-x-0 after:bg-emerald-300 after:shadow-[0_0_10px_rgba(52,211,153,0.9)] after:transition-transform group-hover:after:scale-x-100'>
+								{item.label}
+							</span>
+						</button>
+					);
+				})}
+			</nav>
+		</aside>
+	);
+}
+
+function PanelGeneral({
+	budget,
+	categoryExpenseData,
+	categoryIncomeData,
+	cycleLabel,
+	cycleMovements,
+	draft,
+	isCategoryOpen,
+	isDarkMode,
+	totals,
+	onAddMovement,
+	onCategoryChange,
+	onCategoryToggle,
+	onDeleteMovement,
+	onDraftChange,
+	onPaydayChange,
+	onResetData,
+	onToggleTheme,
+}) {
+	return (
+		<>
+			<AppHeader
+				payday={budget.payday}
+				cycleLabel={cycleLabel}
+				isDarkMode={isDarkMode}
+				onPaydayChange={onPaydayChange}
+				onResetData={onResetData}
+				onToggleTheme={onToggleTheme}
+			/>
+
+			<section className='grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4'>
+				<Metric
+					title='Saldo actual'
+					value={CLP.format(totals.currentBalance)}
+					strong
+				/>
+				<Metric
+					title='Gastado este ciclo'
+					value={CLP.format(totals.expenses)}
+				/>
+				<Metric
+					title='Ingresos extra'
+					value={CLP.format(totals.income)}
+				/>
+				<Metric
+					title='Disponible diario'
+					value={CLP.format(totals.dailyAvailable)}
+					hint={`${totals.remainingDays} dias restantes del ciclo`}
+				/>
+			</section>
+
+			<section className='grid min-w-0 gap-5 lg:grid-cols-[minmax(300px,380px)_minmax(0,1fr)] lg:gap-6'>
+				<div className='min-w-0 space-y-5 sm:space-y-6'>
+					<MovementForm
+						draft={draft}
+						isCategoryOpen={isCategoryOpen}
+						onCategoryToggle={onCategoryToggle}
+						onCategoryChange={onCategoryChange}
+						onDraftChange={onDraftChange}
+						onSubmit={onAddMovement}
+					/>
+				</div>
+
+				<div className='min-w-0 space-y-5 sm:space-y-6'>
+					<CategoryMovementChart
+						data={categoryExpenseData}
+						title='Gastos por categoria'
+						emptyMessage='Aun no hay gastos registrados para este ciclo.'
+						barClassName='bg-[#b86f6f]'
+					/>
+					<CategoryMovementChart
+						data={categoryIncomeData}
+						title='Ingresos por categoria'
+						emptyMessage='Aun no hay ingresos registrados para este ciclo.'
+						barClassName='bg-emerald-600'
+					/>
+
+					<MovementHistory
+						movements={cycleMovements}
+						onDelete={onDeleteMovement}
+					/>
+				</div>
+			</section>
+		</>
+	);
+}
+
+function SavingsView() {
+	return (
+		<section className='min-h-[360px] rounded-lg border border-emerald-500/40 bg-white p-6 shadow-[0_0_20px_rgba(16,185,129,0.16)] dark:bg-emerald-950/70'>
+			<p className='text-sm font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-300'>
+				Ahorros
+			</p>
+			<h2 className='mt-2 text-2xl font-semibold text-slate-950 sm:text-3xl dark:text-emerald-50'>
+				Resumen de ahorros
+			</h2>
+			<p className='mt-4 max-w-2xl text-sm leading-6 text-slate-600 dark:text-emerald-200'>
+				Esta vista queda preparada para registrar el saldo positivo de cada ciclo
+				y seguir tu ahorro acumulado.
+			</p>
+		</section>
 	);
 }
 
