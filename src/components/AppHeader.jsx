@@ -1,4 +1,5 @@
 import { SHOW_RESET_BUTTON } from '../constants';
+import InfoButton from './InfoButton';
 import ResetDataButton from './ResetDataButton';
 import ThemeToggle from './ThemeToggle';
 
@@ -39,6 +40,7 @@ function AppHeader({
 
 				<div className='flex items-center gap-3'>
 					<ThemeToggle isDarkMode={isDarkMode} onToggle={onToggleTheme} />
+					<InfoButton />
 					{SHOW_RESET_BUTTON && (
 						<div className='ml-auto'>
 							<ResetDataButton onReset={onResetData} />
