@@ -70,7 +70,7 @@ function MovementForm({
 					placeholder='Supermercado, sueldo, cuenta de luz...'
 				/>
 
-				<button className='rounded-lg bg-emerald-700 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-800 dark:bg-emerald-600 dark:hover:bg-emerald-500'>
+				<button className='mx-auto w-fit rounded-lg bg-emerald-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-800 sm:mx-0 sm:w-full dark:bg-emerald-600 dark:hover:bg-emerald-500'>
 					Agregar movimiento
 				</button>
 			</div>

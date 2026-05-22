@@ -10,55 +10,66 @@ function MovementHistory({ movements, onDelete }) {
 				</h2>
 			</div>
 
-			<div className='divide-y divide-slate-100 sm:hidden dark:divide-emerald-900'>
-				{movements.map((movement) => (
-					<MovementCard
-						key={movement.id}
-						movement={movement}
-						onDelete={onDelete}
-					/>
-				))}
-				{!movements.length && (
-					<p className='px-4 py-8 text-center text-sm text-slate-500 dark:text-emerald-200'>
-						Aun no hay movimientos registrados.
-					</p>
-				)}
-			</div>
-
-			<div className='hidden overflow-x-auto sm:block'>
-				<table className='w-full min-w-[680px] text-left text-sm'>
-					<thead className='bg-slate-50 text-slate-500 dark:bg-emerald-900/80 dark:text-emerald-200'>
-						<tr>
-							<th className='px-5 py-3 font-medium'>Fecha</th>
-							<th className='px-5 py-3 font-medium'>Tipo</th>
-							<th className='px-5 py-3 font-medium'>Categoria</th>
-							<th className='px-5 py-3 font-medium'>Nota</th>
-							<th className='px-5 py-3 text-right font-medium'>Monto</th>
-							<th className='px-5 py-3'></th>
-						</tr>
-					</thead>
-					<tbody className='divide-y divide-slate-100 dark:divide-emerald-900'>
-						{movements.map((movement) => (
-							<MovementRow
-								key={movement.id}
-								movement={movement}
-								onDelete={onDelete}
-							/>
-						))}
-						{!movements.length && (
-							<tr>
-								<td
-									className='px-5 py-8 text-center text-slate-500 dark:text-emerald-200'
-									colSpan='6'
-								>
-									Aun no hay movimientos registrados.
-								</td>
-							</tr>
-						)}
-					</tbody>
-				</table>
-			</div>
+			<MovementMobileList movements={movements} onDelete={onDelete} />
+			<MovementDesktopTable movements={movements} onDelete={onDelete} />
 		</section>
+	);
+}
+
+function MovementMobileList({ movements, onDelete }) {
+	return (
+		<div className='divide-y divide-slate-100 sm:hidden dark:divide-emerald-900'>
+			{movements.map((movement) => (
+				<MovementCard
+					key={movement.id}
+					movement={movement}
+					onDelete={onDelete}
+				/>
+			))}
+			{!movements.length && (
+				<p className='px-4 py-8 text-center text-sm text-slate-500 dark:text-emerald-200'>
+					Aun no hay movimientos registrados.
+				</p>
+			)}
+		</div>
+	);
+}
+
+function MovementDesktopTable({ movements, onDelete }) {
+	return (
+		<div className='hidden overflow-x-auto sm:block'>
+			<table className='w-full min-w-[680px] text-left text-sm'>
+				<thead className='bg-slate-50 text-slate-500 dark:bg-emerald-900/80 dark:text-emerald-200'>
+					<tr>
+						<th className='px-5 py-3 font-medium'>Fecha</th>
+						<th className='px-5 py-3 font-medium'>Tipo</th>
+						<th className='px-5 py-3 font-medium'>Categoria</th>
+						<th className='px-5 py-3 font-medium'>Nota</th>
+						<th className='px-5 py-3 text-right font-medium'>Monto</th>
+						<th className='px-5 py-3'></th>
+					</tr>
+				</thead>
+				<tbody className='divide-y divide-slate-100 dark:divide-emerald-900'>
+					{movements.map((movement) => (
+						<MovementRow
+							key={movement.id}
+							movement={movement}
+							onDelete={onDelete}
+						/>
+					))}
+					{!movements.length && (
+						<tr>
+							<td
+								className='px-5 py-8 text-center text-slate-500 dark:text-emerald-200'
+								colSpan='6'
+							>
+								Aun no hay movimientos registrados.
+							</td>
+						</tr>
+					)}
+				</tbody>
+			</table>
+		</div>
 	);
 }
 
