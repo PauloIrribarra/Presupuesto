@@ -1,12 +1,15 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import AppHeader from './components/AppHeader';
+import AuthGate from './components/AuthGate';
 import CategoryMovementChart from './components/CategoryMovementChart';
 import Metric from './components/Metric';
 import MovementForm from './components/MovementForm';
 import MovementHistory from './components/MovementHistory';
+import { AUTH_ENABLED, HAS_SUPABASE_CONFIG } from './config';
 import { CLP, categories } from './constants';
 import { formatCycleRange, getCurrentCycle, isDateInCycle } from './dateUtils';
 import { loadState, loadTheme, saveBudget, saveTheme } from './storage';
+import { supabase } from './supabaseClient';
 
 const getDefaultDraft = () => ({
 	type: 'expense',
@@ -22,6 +25,32 @@ function App() {
 	const [isCategoryOpen, setIsCategoryOpen] = useState(false);
 	const [activeView, setActiveView] = useState('general');
 	const [draft, setDraft] = useState(getDefaultDraft);
+	const [session, setSession] = useState(null);
+	const [isAuthReady, setIsAuthReady] = useState(!AUTH_ENABLED);
+
+	useEffect(() => {
+		if (!AUTH_ENABLED || !supabase) return undefined;
+
+		let isMounted = true;
+
+		supabase.auth.getSession().then(({ data }) => {
+			if (!isMounted) return;
+			setSession(data.session);
+			setIsAuthReady(true);
+		});
+
+		const {
+			data: { subscription },
+		} = supabase.auth.onAuthStateChange((_event, nextSession) => {
+			setSession(nextSession);
+			setIsAuthReady(true);
+		});
+
+		return () => {
+			isMounted = false;
+			subscription.unsubscribe();
+		};
+	}, []);
 
 	const persist = (nextBudget) => {
 		setBudget(nextBudget);
@@ -32,6 +61,11 @@ function App() {
 		const nextMode = !isDarkMode;
 		setIsDarkMode(nextMode);
 		saveTheme(nextMode);
+	};
+
+	const signOut = async () => {
+		if (!supabase) return;
+		await supabase.auth.signOut();
 	};
 
 	const cycle = useMemo(() => getCurrentCycle(budget.payday), [budget.payday]);
@@ -117,6 +151,26 @@ function App() {
 		persist(initialState);
 	};
 
+	if (AUTH_ENABLED && !HAS_SUPABASE_CONFIG) {
+		return <AuthGate isDarkMode={isDarkMode} configMissing />;
+	}
+
+	if (AUTH_ENABLED && !isAuthReady) {
+		return (
+			<main
+				className={`flex min-h-screen items-center justify-center px-4 text-sm font-semibold ${
+					isDarkMode ? 'dark bg-emerald-950 text-emerald-100' : 'bg-[#f6f7f2] text-emerald-900'
+				}`}
+			>
+				Cargando sesion...
+			</main>
+		);
+	}
+
+	if (AUTH_ENABLED && !session) {
+		return <AuthGate isDarkMode={isDarkMode} />;
+	}
+
 	return (
 		<main
 			className={`min-h-screen overflow-x-hidden px-3 py-4 text-slate-900 transition-colors sm:px-6 sm:py-6 lg:px-8 ${
@@ -148,7 +202,9 @@ function App() {
 							onDraftChange={updateDraft}
 							onPaydayChange={updatePayday}
 							onResetData={resetData}
+							onSignOut={AUTH_ENABLED ? signOut : undefined}
 							onToggleTheme={toggleTheme}
+							userEmail={session?.user?.email}
 						/>
 					) : (
 						<SavingsView />

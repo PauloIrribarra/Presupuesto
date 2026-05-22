@@ -9,7 +9,9 @@ function AppHeader({
 	isDarkMode,
 	onPaydayChange,
 	onResetData,
+	onSignOut,
 	onToggleTheme,
+	userEmail,
 }) {
 	return (
 		<header className='flex min-w-0 flex-col gap-4 border-b border-slate-200 pb-5 sm:pb-6 md:flex-row md:items-end md:justify-between dark:border-emerald-800/70'>
@@ -41,6 +43,16 @@ function AppHeader({
 				<div className='flex items-center gap-3'>
 					<ThemeToggle isDarkMode={isDarkMode} onToggle={onToggleTheme} />
 					<InfoButton />
+					{onSignOut && (
+						<button
+							type='button'
+							onClick={onSignOut}
+							title={userEmail ? `Cerrar sesion de ${userEmail}` : 'Cerrar sesion'}
+							className='rounded-lg border border-emerald-600/40 px-3 py-2 text-sm font-semibold text-emerald-800 transition hover:border-emerald-700 hover:bg-emerald-50 dark:border-emerald-400/40 dark:text-emerald-100 dark:hover:bg-emerald-900/50'
+						>
+							Salir
+						</button>
+					)}
 					{SHOW_RESET_BUTTON && (
 						<div className='ml-auto'>
 							<ResetDataButton onReset={onResetData} />
