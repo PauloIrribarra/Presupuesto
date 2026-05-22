@@ -15,13 +15,20 @@ function AppHeader({
 }) {
 	return (
 		<header className='flex min-w-0 flex-col gap-4 border-b border-slate-200 pb-5 sm:pb-6 md:flex-row md:items-end md:justify-between dark:border-emerald-800/70'>
-			<div className='min-w-0'>
-				<p className='text-sm font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-300'>
-					Presupuesto personal
-				</p>
-				<h1 className='mt-2 text-2xl font-semibold leading-tight text-slate-950 sm:text-3xl md:text-5xl dark:text-emerald-50'>
-					Control mensual de tu dinero
-				</h1>
+			<div className='flex min-w-0 items-center gap-3 sm:gap-4'>
+				<img
+					src='/logoGestión.png'
+					alt='Logo Gestion de Presupuesto'
+					className='h-14 w-14 shrink-0 rounded-full border border-white object-contain shadow-[0_10px_26px_rgba(15,23,42,0.18)] sm:h-16 sm:w-16 md:h-20 md:w-20'
+				/>
+				<div className='min-w-0'>
+					<p className='text-sm font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-300'>
+						Presupuesto personal
+					</p>
+					<h1 className='mt-2 text-2xl font-semibold leading-tight text-slate-950 sm:text-3xl md:text-5xl dark:text-emerald-50'>
+						Control mensual de tu dinero
+					</h1>
+				</div>
 			</div>
 
 			<div className='flex w-full min-w-0 flex-col gap-3 md:max-w-xs'>
@@ -54,7 +61,7 @@ function AppHeader({
 						</button>
 					)}
 					{SHOW_RESET_BUTTON && (
-						<div className='ml-auto'>
+						<div>
 							<ResetDataButton onReset={onResetData} />
 						</div>
 					)}
