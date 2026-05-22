@@ -1,5 +1,5 @@
 {
-	"name": "Gestión de Presupuesto",
+	"name": "Gestion de Presupuesto",
 	"short_name": "Presupuesto",
 	"description": "Control mensual de presupuesto personal.",
 	"start_url": ".",
@@ -9,7 +9,7 @@
 	"theme_color": "#064e3b",
 	"icons": [
 		{
-			"src": "logoGestión.png",
+			"src": "favicon.svg",
 			"sizes": "any",
 			"type": "image/svg+xml",
 			"purpose": "any maskable"

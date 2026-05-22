@@ -266,7 +266,9 @@ function PanelGeneral({
 	onDraftChange,
 	onPaydayChange,
 	onResetData,
+	onSignOut,
 	onToggleTheme,
+	userEmail,
 }) {
 	return (
 		<>
@@ -276,7 +278,9 @@ function PanelGeneral({
 				isDarkMode={isDarkMode}
 				onPaydayChange={onPaydayChange}
 				onResetData={onResetData}
+				onSignOut={onSignOut}
 				onToggleTheme={onToggleTheme}
+				userEmail={userEmail}
 			/>
 
 			<section className='grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4'>

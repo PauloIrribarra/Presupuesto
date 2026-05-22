@@ -1,16 +1,61 @@
-# React + Vite
+# Presupuesto
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Aplicacion web para controlar un presupuesto personal por ciclos de pago. Permite registrar ingresos y gastos, ver el saldo disponible del ciclo actual, revisar el disponible diario y analizar movimientos agrupados por categoria.
 
-Currently, two official plugins are available:
+## Funcionalidades
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Registro de movimientos como gasto o ingreso.
+- Categorias configuradas para cuentas, comida, suscripciones, negocios, ahorro y otros.
+- Calculo automatico del ciclo segun el dia de pago.
+- Metricas de saldo actual, gastos, ingresos y disponible diario.
+- Resumen de gastos e ingresos por categoria.
+- Historial responsive con opcion de eliminar movimientos.
+- Tema claro/oscuro persistente.
+- Persistencia local con `localStorage`.
+- Autenticacion opcional con Supabase.
+- Configuracion PWA basica mediante manifest.
 
-## React Compiler
+## Requisitos
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Node.js
+- npm
 
-## Expanding the ESLint configuration
+## Instalacion
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```bash
+npm install
+```
+
+## Desarrollo
+
+```bash
+npm run dev
+```
+
+## Build
+
+```bash
+npm run build
+```
+
+## Lint
+
+```bash
+npm run lint
+```
+
+## Variables de entorno
+
+Copia `.env.example` a `.env.local` y completa los valores si quieres usar autenticacion.
+
+```env
+VITE_AUTH_ENABLED=true
+VITE_SUPABASE_URL=
+VITE_SUPABASE_PUBLISHABLE_KEY=
+```
+
+Si `VITE_AUTH_ENABLED` no es `true`, la app funciona sin login y guarda los datos solo en el navegador.
+
+## Estado actual
+
+La vista principal esta operativa. La vista de ahorros esta preparada como base para una siguiente etapa, pero aun no guarda ni calcula ahorro acumulado. Supabase se usa para autenticacion; los movimientos todavia no se sincronizan con la base de datos.
