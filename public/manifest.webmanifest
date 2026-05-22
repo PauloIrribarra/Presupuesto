@@ -9,7 +9,7 @@
 	"theme_color": "#064e3b",
 	"icons": [
 		{
-			"src": "favicon.svg",
+			"src": "logoGestión.png",
 			"sizes": "any",
 			"type": "image/svg+xml",
 			"purpose": "any maskable"
