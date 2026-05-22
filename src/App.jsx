@@ -25,6 +25,7 @@ function App() {
 	const [isCategoryOpen, setIsCategoryOpen] = useState(false);
 	const [activeView, setActiveView] = useState('general');
 	const [draft, setDraft] = useState(getDefaultDraft);
+	const [movementError, setMovementError] = useState('');
 	const [session, setSession] = useState(null);
 	const [isAuthReady, setIsAuthReady] = useState(!AUTH_ENABLED);
 
@@ -104,6 +105,7 @@ function App() {
 	);
 
 	const updateDraft = (changes) => {
+		setMovementError('');
 		setDraft((currentDraft) => ({ ...currentDraft, ...changes }));
 	};
 
@@ -117,7 +119,17 @@ function App() {
 	const addMovement = (event) => {
 		event.preventDefault();
 		const amount = Number(draft.amount);
-		if (!amount || amount < 1) return;
+		if (!amount || amount < 1) {
+			setMovementError('Ingresa un monto valido.');
+			return;
+		}
+
+		if (draft.type === 'expense' && amount > totals.currentBalance) {
+			setMovementError(
+				`El gasto supera tu saldo actual disponible (${CLP.format(totals.currentBalance)}).`,
+			);
+			return;
+		}
 
 		persist({
 			...budget,
@@ -131,6 +143,7 @@ function App() {
 			],
 		});
 
+		setMovementError('');
 		updateDraft({ amount: '', note: '' });
 	};
 
@@ -189,6 +202,7 @@ function App() {
 							cycleLabel={cycleLabel}
 							cycleMovements={cycleMovements}
 							draft={draft}
+							error={movementError}
 							isCategoryOpen={isCategoryOpen}
 							isDarkMode={isDarkMode}
 							totals={totals}
@@ -256,6 +270,7 @@ function PanelGeneral({
 	cycleLabel,
 	cycleMovements,
 	draft,
+	error,
 	isCategoryOpen,
 	isDarkMode,
 	totals,
@@ -308,6 +323,7 @@ function PanelGeneral({
 				<div className='min-w-0 space-y-5 sm:space-y-6'>
 					<MovementForm
 						draft={draft}
+						error={error}
 						isCategoryOpen={isCategoryOpen}
 						onCategoryToggle={onCategoryToggle}
 						onCategoryChange={onCategoryChange}

@@ -4,27 +4,34 @@ import { CLP } from '../constants';
 function CategoryMovementChart({ data, title, emptyMessage, barClassName }) {
 	const hasItems = data.items.length > 0;
 	const [openCategory, setOpenCategory] = useState(null);
+	const topItem = data.items[0];
 
 	return (
 		<section className='min-w-0 rounded-lg border border-slate-200 bg-white p-4 shadow-sm sm:p-5 dark:border-emerald-800 dark:bg-emerald-950/70 dark:shadow-none'>
-			<div className='flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between'>
+			<div className='flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between'>
 				<div className='min-w-0'>
 					<h2 className='text-lg font-semibold text-slate-950 dark:text-emerald-50'>
 						{title}
 					</h2>
 					<p className='text-sm text-slate-500 dark:text-emerald-200'>
-						Total agrupado del ciclo activo
+						Ranking del ciclo activo
 					</p>
 				</div>
-				<p className='text-sm font-semibold text-slate-700 dark:text-emerald-100'>
-					Total: {CLP.format(data.total)}
-				</p>
+				<div className='rounded-lg bg-slate-50 px-3 py-2 text-left sm:text-right dark:bg-emerald-900/50'>
+					<p className='text-xs font-semibold text-slate-500 dark:text-emerald-300'>
+						Total
+					</p>
+					<p className='text-lg font-semibold text-slate-950 dark:text-emerald-50'>
+						{CLP.format(data.total)}
+					</p>
+				</div>
 			</div>
 
 			{hasItems ? (
 				<div className='mt-5 space-y-4'>
+					<TopCategorySummary item={topItem} total={data.total} barClassName={barClassName} />
 					{data.items.map(({ category, movements, total }) => (
-						<CategoryBar
+						<CategoryRankingItem
 							key={category}
 							category={category}
 							movements={movements}
@@ -48,7 +55,40 @@ function CategoryMovementChart({ data, title, emptyMessage, barClassName }) {
 	);
 }
 
-function CategoryBar({
+function TopCategorySummary({ item, total, barClassName }) {
+	const percent = total ? (item.total / total) * 100 : 0;
+
+	return (
+		<div className='rounded-lg border border-slate-200 bg-slate-50 p-4 dark:border-emerald-800 dark:bg-emerald-900/40'>
+			<div className='flex items-start justify-between gap-3'>
+				<div className='min-w-0'>
+					<p className='text-xs font-semibold text-slate-500 dark:text-emerald-300'>
+						Mayor categoria
+					</p>
+					<p className='mt-1 truncate text-xl font-semibold text-slate-950 dark:text-emerald-50'>
+						{item.category}
+					</p>
+				</div>
+				<div className='shrink-0 text-right'>
+					<p className='text-2xl font-semibold text-slate-950 dark:text-emerald-50'>
+						{percent.toFixed(0)}%
+					</p>
+					<p className='text-xs font-semibold text-slate-500 dark:text-emerald-300'>
+						{CLP.format(item.total)}
+					</p>
+				</div>
+			</div>
+			<div className='mt-4 h-3 overflow-hidden rounded-full bg-white dark:bg-emerald-950/70'>
+				<div
+					className={`h-full rounded-full ${barClassName}`}
+					style={{ width: `${Math.max(percent, 4)}%` }}
+				/>
+			</div>
+		</div>
+	);
+}
+
+function CategoryRankingItem({
 	category,
 	movements,
 	total,
@@ -62,15 +102,15 @@ function CategoryBar({
 	const percent = overallTotal ? (total / overallTotal) * 100 : 0;
 
 	return (
-		<div className='rounded-lg border border-slate-100 p-3 dark:border-emerald-900'>
+		<div className='rounded-lg border border-slate-100 bg-white p-3 dark:border-emerald-900 dark:bg-emerald-950/40'>
 			<button
 				type='button'
 				onClick={onToggle}
 				className='w-full text-left'
 				aria-expanded={isOpen}
 			>
-				<div className='mb-2 grid gap-1 text-sm sm:flex sm:items-center sm:justify-between sm:gap-3'>
-					<span className='flex min-w-0 items-center gap-2 font-semibold text-slate-800 dark:text-emerald-100'>
+				<div className='grid gap-3 sm:grid-cols-[1fr_auto] sm:items-center'>
+					<span className='flex min-w-0 items-center gap-2 text-left font-semibold text-slate-800 dark:text-emerald-100'>
 						<span
 							className={`shrink-0 text-slate-400 transition dark:text-emerald-400 ${
 								isOpen ? 'rotate-90' : ''
@@ -83,15 +123,20 @@ function CategoryBar({
 							{movements.length}
 						</span>
 					</span>
-					<span className='pl-6 text-xs font-semibold text-slate-500 sm:shrink-0 sm:pl-0 sm:text-sm dark:text-emerald-200'>
-						{CLP.format(total)} - {percent.toFixed(1)}%
+					<span className='flex items-baseline gap-2 pl-6 sm:justify-end sm:pl-0'>
+						<span className='text-xl font-semibold text-slate-950 dark:text-emerald-50'>
+							{percent.toFixed(0)}%
+						</span>
+						<span className='text-sm font-semibold text-slate-500 dark:text-emerald-200'>
+							{CLP.format(total)}
+						</span>
 					</span>
-				</div>
-				<div className='h-9 overflow-hidden rounded-lg bg-slate-100 dark:bg-emerald-900/80'>
-					<div
-						className={`flex h-full items-center rounded-lg px-3 text-xs font-semibold text-white transition ${barClassName}`}
-						style={{ width: `${width}%` }}
-					/>
+					<div className='h-3 overflow-hidden rounded-full bg-slate-100 sm:col-span-2 dark:bg-emerald-900/80'>
+						<div
+							className={`h-full rounded-full transition ${barClassName}`}
+							style={{ width: `${width}%` }}
+						/>
+					</div>
 				</div>
 			</button>
 
